@@ -4,6 +4,8 @@
 
 init offset = -1
 
+default player_progress = 0
+default pig_progress = 0
 
 ################################################################################
 ## Styles
@@ -80,6 +82,80 @@ style frame:
 ################################################################################
 ## In-game screens
 ################################################################################
+transform slide_in_from_left:
+    on show:
+        zoom 0.8
+        xalign -0.5
+        yalign 1.0
+        linear 0.6 xalign 0.0
+
+transform slide_in_from_right:
+    on show:
+        zoom 1.25
+        xalign 1.5
+        yalign 1.0
+        linear 0.6 xalign 0.9
+
+transform change_scene_transform:
+    on show:
+        alpha 0.0
+        linear 0.5 alpha 1.0
+        pause 0.6
+        linear 0.5 alpha 0.0
+style change_scene_text:
+    size 96
+    color "#ffffff"
+    bold True
+    outlines [(2, "#000000")]
+    
+screen change_scene(msg):
+    modal True
+    tag change_scene
+    add Solid("#00000080")
+    add "beach.png" xalign 0.5 yalign 0.5
+    text msg style "change_scene_text" xalign 0.5 yalign 0.5 at change_scene_transform
+    timer 1.6 action Return()
+
+screen two_images(a, b, x, y, z):
+    default current = 0
+    $ images = [a, b]
+    add images[current] at Transform(xalign=x, yalign=y, zoom=z)
+    timer 0.75 repeat True action SetScreenVariable("current", (current + 1) % 2)
+
+transform zoom_out:
+    zoom 0.1
+    xalign 0.5
+    yalign 0.5
+    on show:
+        zoom 2.0
+        linear 1.0 zoom 1.0
+
+transform fade_in:
+    xalign 0.9
+    yalign 0.9
+    on show:
+        alpha 0.0
+        linear 0.5 alpha 1.0
+
+transform fade_out:
+    xalign 0.9
+    yalign 0.9
+    on show:
+        alpha 0.0
+        linear 0.5 alpha 1.0
+        pause 0.5
+        linear 0.5 alpha 0.0
+
+screen bye:
+    default current = 0
+    $ images = ["shoot1.png", "shoot2.png", "shoot3.png"]
+    if current < len(images):
+        add images[current]
+        if current < len(images) - 1:
+            add "you sad.png" at fade_in
+            timer 1.6 action SetScreenVariable("current", (current + 1) % len(images))
+        else:
+            add "you sad.png" at fade_out
 
 
 ## Say screen ##################################################################
@@ -94,6 +170,7 @@ style frame:
 ## and id "window" to apply style properties.
 ##
 ## https://www.renpy.org/doc/html/screen_special.html#say
+
 
 screen say(who, what):
 
@@ -116,9 +193,36 @@ screen say(who, what):
         add SideImage() xalign 0.0 yalign 1.0
 
 
+
 ## Make the namebox available for styling through the Character object.
 init python:
+    import random
+    import renpy.store as store
+
+    def _inc_player():
+        store.player_progress = min(10, store.player_progress + 1)
+
+    def _inc_pig():
+        store.pig_progress = min(10, store.pig_progress + 1)
     config.character_id_prefixes.append('namebox')
+
+screen race_screen():
+    modal True
+    tag race
+    frame:
+        xalign 0.5
+        yalign 0.5
+        padding (20, 20)
+        vbox:
+            spacing 8
+            text "Race to the Corn!"
+            text "Press <SPACE> to Run!"
+            text "You: [player_progress]"
+            text "Pig: [pig_progress]"
+            bar value player_progress range 10 xmaximum 400
+            bar value pig_progress range 10 xmaximum 400
+    key "K_SPACE" action Function(_inc_player)
+    timer 0.6 action Function(_inc_pig) repeat True          
 
 style window is default
 style say_label is default
@@ -160,6 +264,8 @@ style say_dialogue:
     ypos gui.dialogue_ypos
 
     adjust_spacing False
+
+
 
 ## Input screen ################################################################
 ##
@@ -206,25 +312,27 @@ style input:
 
 screen choice(items):
     style_prefix "choice"
-
     vbox:
-        for i in items:
-            textbutton i.caption action i.action
+        for i, opt in enumerate(items):
+            textbutton opt.caption action opt.action
+                    
+            
 
 
-style choice_vbox is vbox
+style choice_vbox is hbox
 style choice_button is button
 style choice_button_text is button_text
 
 style choice_vbox:
     xalign 0.5
-    ypos 405
-    yanchor 0.5
+    ypos 750
+    yanchor -0.1
 
     spacing gui.choice_spacing
 
 style choice_button is default:
     properties gui.button_properties("choice_button")
+
 
 style choice_button_text is default:
     properties gui.text_properties("choice_button")
@@ -269,7 +377,7 @@ style quick_button_text is button_text
 
 style quick_menu:
     xalign 0.5
-    yalign 1.0
+    yalign 0.025
 
 style quick_button:
     properties gui.button_properties("quick_button")
