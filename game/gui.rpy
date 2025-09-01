@@ -28,7 +28,7 @@ define config.check_conflicting_properties = True
 define gui.accent_color = '#99ccff'
 
 ## The color used for a text button when it is neither selected nor hovered.
-define gui.idle_color = '#696969'
+define gui.idle_color = '#6f6f6f'
 
 ## The small color is used for small text, which needs to be brighter/darker to
 ## achieve the same effect.
@@ -450,7 +450,7 @@ init python:
         gui.choice_button_width = 1860
         gui.choice_button_text_size = 45
 
-        gui.navigation_spacing = 30
+        gui.navigation_spacing = 15
         gui.pref_button_spacing = 15
 
         gui.history_height = 285

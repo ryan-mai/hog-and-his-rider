@@ -99,6 +99,18 @@ transform change_scene_transform:
         linear 0.5 alpha 1.0
         pause 0.6
         linear 0.5 alpha 0.0
+
+transform left_move:
+    zoom 0.75
+    yalign 1.0
+    xalign -0.5
+    linear 1.0 xalign 0.5
+
+transform hog_slide:
+    xalign 1.0
+    yalign 1.0
+    zoom 0.75
+    linear 1.2 xalign 0.2        
 style change_scene_text:
     size 96
     color "#ffffff"
@@ -429,51 +441,62 @@ style quick_button_text:
 ## This screen is included in the main and game menus, and provides navigation
 ## to other menus, and to start the game.
 
+define gui.start_button_text_size = 72
+style start_button is gui_button
+style start_button_text is gui_button_text:
+    size gui.start_button_text_size
+    color gui.hover_color
+    idle_color "#ffffff"
+    hover_color gui.button_text_hover_color
+    outlines [ (4, "#00000080") ]
+
+# Add backgrounds (adjust border in Frame if you need scaling without distortion)
+style start_button:
+    background Frame("gui/button/start_idle.png", 30,30,30,30)
+    hover_background Frame("gui/button/start_hover.png", 30,30,30,30)
+    padding (60, 40)
+    xminimum 700
+    yminimum 250
+    xalign 0.5
+    yalign 0.5
+
 screen navigation():
+    tag menu
+    add gui.main_menu_background
 
-    vbox:
+    if main_menu and not _in_replay:
+        button:
+            style "start_button"
+            align (0.7, 0.65)
+            action Start()
+            text _("Start") style "start_button_text" xalign 0.5 yalign 0.5
+
+    hbox:
         style_prefix "navigation"
-
-        xpos gui.navigation_xpos
+        xalign 0.5
         yalign 0.5
-
+        yoffset 480
         spacing gui.navigation_spacing
 
-        if main_menu:
-
-            textbutton _("Start") action Start()
-
-        else:
-
+        if not main_menu:
             textbutton _("History") action ShowMenu("history")
-
             textbutton _("Save") action ShowMenu("save")
 
         textbutton _("Load") action ShowMenu("load")
-
         textbutton _("Preferences") action ShowMenu("preferences")
 
         if _in_replay:
-
             textbutton _("End Replay") action EndReplay(confirm=True)
-
         elif not main_menu:
-
             textbutton _("Main Menu") action MainMenu()
 
         textbutton _("About") action ShowMenu("about")
 
         if renpy.variant("pc") or (renpy.variant("web") and not renpy.variant("mobile")):
-
-            ## Help isn't necessary or relevant to mobile devices.
             textbutton _("Help") action ShowMenu("help")
 
         if renpy.variant("pc"):
-
-            ## The quit button is banned on iOS and unnecessary on Android and
-            ## Web.
             textbutton _("Quit") action Quit(confirm=not main_menu)
-
 
 style navigation_button is gui_button
 style navigation_button_text is gui_button_text
@@ -484,6 +507,7 @@ style navigation_button:
 
 style navigation_button_text:
     properties gui.text_properties("navigation_button")
+    xalign 0.5
 
 
 ## Main Menu screen ############################################################
@@ -529,7 +553,7 @@ style main_menu_frame:
     xsize 420
     yfill True
 
-    background "gui/overlay/main_menu.png"
+    # background "gui/overlay/main_menu.png"
 
 style main_menu_vbox:
     xalign 1.0
@@ -645,7 +669,7 @@ style game_menu_outer_frame:
     bottom_padding 45
     top_padding 180
 
-    background "gui/overlay/game_menu.png"
+    # background "gui/overlay/game_menu.png"
 
 style game_menu_navigation_frame:
     xsize 420

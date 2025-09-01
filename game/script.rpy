@@ -34,7 +34,11 @@ transform left_move:
     xalign -0.5
     linear 1.0 xalign 0.5
 label start:
-
+    pause 1.0
+    scene black with Dissolve(0.8)
+    window hide
+    show text "{size=28}{color=#ff3425}Under Section 107 of the Copyright Act 1976, allowance is made for “fair use” for purposes such as commentary, news reporting, scholarship, and research.\nFair use is a use permitted by copyright law that might otherwise be infringing.\nNon-profit, educational, or personal use tips the balance in favor of fair use.\nAll assets used in this project are the property of Supercell.\nThis is a fan-made project inspired by Supercell's game Clash Royale and is not affiliated with, endorsed, or sponsored by Supercell.{/color}{/size}" at Transform(xalign=0.5, yalign=0.5)
+    pause 3.5
     # Show a background. This uses a placeholder by default, but you can
     # add a file (named either "bg room.png" or "bg room.jpg") to the
     # images directory to show it.
@@ -406,12 +410,12 @@ label c4:
     hide ar smile
     show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Come on are you really going to chicken out last minute!"
+    window hide
     menu:
         "Of course, I'm not!":
             call clear
             jump c4a
         "I don't know...":
-            call clear
             jump c4b
 
 
@@ -440,20 +444,28 @@ label c4a:
 label c4b:
     ar "Cmon I know you are that much of a weakling..."
     ar "Are you really going to betray us..."
+    show ar sad at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Even after our king specifically gave you a mission?"
     ar "We have never had that honour!"
+    show you sad at Transform(xalign=0.85, yalign=1.1, zoom=1.0)
     you "You're right..."
+    show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Think about the glory!"
     ar "Isn't that what you want?"
     ar "You came to the king seeking the very power the hog rider has stolen from you"
+    show you fear at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
     you "Yea..."
     ar "And now you can take it back!"
     ar "What do you say?"
+    show ar talk at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Or are you still the same old coward I thought you were..."
+    show you lie1 at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
     you "No I am not!"
     you "But do you promise the king will make me like him?!"
+    show ar smile at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Of course!"
     ar "We would never lie!"
+    show you sad at Transform(xalign=0.85, yalign=1.1, zoom=1.0)
     you "Ok fine, I'll do it..."
     jump c4a2
 
@@ -521,13 +533,19 @@ label c4a1:
     jump c4a1a
 
 label c4a2:
+    show ar talk at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "That's the spirit!"
+    show you lie2 at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
     you "So who's going to do it?"
+    show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "You of course!"
     ar "We will watch over..."
+    show ar smile at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Make sure nobody tries anything funny!"
     ar "Kapeesh?"
+    show you fear at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
     you "Bahlright..."
+    call clear
     jump c4a1a
 
 label c4a1a:
@@ -598,22 +616,43 @@ label c4a1a1:
         you "Heh..."
         you "I never said which corn!"
         you "I had one in my pocket all along!"
-        you "Now, follow me..."
         window hide
     menu:
         "Put him on a leash":
             you "Now stay quite..."
             you "Heh..."
             call clear
+            show bg night
+            show go plot at Transform(xalign=0.05, yalign=1.0, yzoom=0.45, xzoom= -0.45)
+
+            show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+            show you plot2 at Transform(xalign=0.95, yalign=1.0, xzoom=-0.5, yzoom=0.5)
+            show hog sad at Transform(xalign=1.0, yalign=1.0, zoom=0.7)
+
             ar "Well done!"
             ar "Bring the hog to the goblins"
             you "Ok..."
+            show hog sad at hog_slide
+            pause 2.0
             ar "Now, your work has been done..."
+            show you fear at Transform(xalign=1.0, yalign=1.0, zoom=0.7)
+            you "What do you mean?"
+            show ar smile at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
             ar "The king sees no further use in you!"
-            you "What?!"
+            show you fear at Transform(xalign=1.2, yalign=1.5, zoom=3.5)
+            you "This must be a joke!"
+            show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
             ar "What are you going to do?"
             ar "Fight all of us at once?"
-            ar "Yea shoot!"
+            show ar sad at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+            ar "Yea shoot you scum!"
+            call clear
+            scene black with Dissolve(0.8)
+            window hide
+            show text "{size=56}{color=#ffffff}To be continued...{/color}{/size}" at Transform(xalign=0.5, yalign=0.5)
+            pause 5.0
+            hide text
+            jump start
         "Put him in a box":
             you "Ok, now be quite..."
             call clear
@@ -638,9 +677,9 @@ label c4a1ab:
     scene black with Dissolve(0.8)
     window hide
     show text "{size=56}{color=#ffffff}To be continued...{/color}{/size}" at Transform(xalign=0.5, yalign=0.5)
-    pause 3.5
+    pause 5.0
     hide text
-    return
+    jump start
 
 label corn_minigame:
     show bg corngame 
