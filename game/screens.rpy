@@ -4,9 +4,6 @@
 
 init offset = -1
 
-default player_progress = 0
-default pig_progress = 0
-
 ################################################################################
 ## Styles
 ################################################################################
@@ -130,6 +127,16 @@ transform zoom_out:
         zoom 2.0
         linear 1.0 zoom 1.0
 
+transform zoom_in:
+    zoom 0.1
+    xalign 0.5
+    yalign 0.5
+    on show:
+        zoom 2.0
+        yalign 0.5
+        xalign 0.8
+
+        linear 1.0 zoom 1.5
 transform fade_in:
     xalign 0.9
     yalign 0.9
@@ -193,37 +200,64 @@ screen say(who, what):
         add SideImage() xalign 0.0 yalign 1.0
 
 
-
 ## Make the namebox available for styling through the Character object.
 init python:
     import random
     import renpy.store as store
 
     def _inc_player():
-        store.player_progress = min(10, store.player_progress + 1)
+        store.player_progress = min(67, store.player_progress + 1)
 
     def _inc_pig():
-        store.pig_progress = min(10, store.pig_progress + 1)
+        store.pig_progress = min(67, store.pig_progress + 1)
     config.character_id_prefixes.append('namebox')
+
+default goal = 67
+default player_progress = 0
+default pig_progress = 0
 
 screen race_screen():
     modal True
     tag race
+
     frame:
+        background None
         xalign 0.5
-        yalign 0.5
+        yalign 0.0
+        yoffset 260
         padding (20, 20)
+
         vbox:
             spacing 8
-            text "Race to the Corn!"
-            text "Press <SPACE> to Run!"
-            text "You: [player_progress]"
-            text "Pig: [pig_progress]"
-            bar value player_progress range 10 xmaximum 400
-            bar value pig_progress range 10 xmaximum 400
-    key "K_SPACE" action Function(_inc_player)
-    timer 0.6 action Function(_inc_pig) repeat True          
 
+            text "Corn Race <SPACE> !" xalign 0.5 color "#ffffff"
+            text "You: [player_progress]/[goal]" size 22 xalign 0.5 color "#ffffff"
+            text "Pig: [pig_progress]/[goal]" size 22 xalign 0.5 color "#ffffff"
+
+            bar value player_progress range goal xmaximum 400 xalign 0.5
+            bar value pig_progress range goal xmaximum 400 xalign 0.5
+
+            fixed:
+                xsize 1920
+                ysize 400
+                add "you plot2.png" at Transform(
+                    xalign=min(1.2, max(0.0, player_progress / float(goal))),
+                    yalign=0.4, zoom=0.2)
+                add "hog smile.png" at Transform(
+                    xalign=min(1.2, max(0.0, pig_progress / float(goal))),
+                    yalign=0.75, zoom=0.5)
+
+    if player_progress == goal and pig_progress < goal:
+        timer 0.01 action Return("player")
+    elif pig_progress == goal and player_progress < goal:
+        timer 0.01 action Return("pig")
+    elif pig_progress == goal and player_progress == goal:
+        timer 0.01 action Return("tie")
+    key "K_SPACE" action Function(_inc_player)
+
+    for i in range(7):
+        if player_progress < (i + 1)*10:
+            timer (1.1 - i/10) action Function(_inc_pig) repeat True
 style window is default
 style say_label is default
 style say_dialogue is default
@@ -1727,3 +1761,84 @@ style slider_vbox:
 style slider_slider:
     variant "small"
     xsize 900
+
+default attack_frame = 1
+default damage_dealt = 0
+default time_left = 15
+default giant_result = None
+default last_crit = False
+
+init python:
+    class GiantAttack(Action):
+
+        def __call__(self):
+            if store.giant_result is not None:
+                return
+            store.attack_frame = (store.attack_frame % 3) + 1
+            import random
+            crit = random.random() < 0.1
+            dmg = 3 if crit else 2
+            store.last_crit = crit
+            store.damage_dealt += dmg
+            if store.damage_dealt >= 100:
+                store.giant_result = "win"
+            renpy.restart_interaction()
+
+screen giant_minigame():
+    modal True
+    tag giant_minigame
+
+    if giant_result is None:
+        timer 1.0 action If(time_left > 0,
+                            true=SetVariable("time_left", time_left - 1),
+                            false=[SetVariable("giant_result", "lose")]) repeat True
+
+    if attack_frame == 1:
+        add "attack1.png" xalign 0.5 yalign 0.5 at Transform(zoom=0.75)
+    elif attack_frame == 2:
+        add "attack2.png" xalign 0.5 yalign 0.5 at Transform(zoom=0.75)
+    else:
+        add "attack3.png" xalign 0.5 yalign 0.5 at Transform(zoom=0.75)
+
+    imagebutton:
+        idle "attack1.png"
+        hover "attack2.png"
+        focus_mask True
+        at Transform(zoom=0.75, alpha=0.0)
+        xalign 0.5 yalign 0.5
+        action GiantAttack()
+
+    frame:
+        background Solid("#0008")
+        xalign 0.5 yalign 0.08
+        padding (10, 10)
+        vbox:
+            spacing 4
+            text "Time: [time_left]s" color "#ffffff"
+            $ needed = max(0, 100 - damage_dealt)
+            text "Damage: [damage_dealt]/100" color "#ff5050"
+            if last_crit:
+                text "CRIT +3!" color "#ff5050"
+                timer 0.3 action SetVariable("last_crit", False)
+
+    if giant_result == "win":
+        frame:
+            background Solid("#000c")
+            xalign 0.5 yalign 0.5
+            padding (30, 30)
+            vbox:
+                spacing 12
+                text "You Pass..." size 40 color "#ffffff" xalign 0.5
+                textbutton "Continue" action Return(True)
+    elif giant_result == "lose":
+        frame:
+            background Solid("#000c")
+            xalign 0.5 yalign 0.5
+            padding (30, 30)
+            vbox:
+                spacing 12
+                text "Failed! Time's up." size 40 color "#ffffff"
+                textbutton "Continue" action Return(False)
+
+    if giant_result is None:
+        textbutton "Chicken Out" xalign 0.5 yalign 0.95 action SetVariable("giant_result", "lose")

@@ -12,6 +12,10 @@ image bg beach2 = "beach.png"
 image bg home1 = "hr home1.png"
 image bg home2 = "hr home2.png"
 image bg home3 = "hr home3.png"
+image bg night = "hr night.png"
+image bg night2 = "hr night2.png"
+image bg corngame = "hr night3.png"
+default winner = None
 default c1 = "a"
 define rk = Character("Red King", color="#c00")
 define you = Character("You", color="#00A1F0")
@@ -23,44 +27,6 @@ define al = Character("Crowd", color="#7d7d7d")
 define va = Character("Valkaryie", color="#ee802c")
 define go = Character("Goblin", color="#71d63b")
 define an = Character("Announcer", color="#98403a")
-screen delayed_voice(filename):
-    timer 0.45 action [Play("voice", filename), Hide("delayed_voice")]
-
-default strength = 32
-default troop_hp = 64
-default attack_frame = 1
-init python:
-    class AttackTroop(Action):
-        """
-            you attack the giant!
-        """
-        def __call__(self):
-            global strength, troop_hp, attack_frame
-    
-            if troop_hp > 0:
-                attack_frame = (attack_frame % 3) + 1
-                if attack_frame == 3:
-                    troop_hp -= strength
-                renpy.restart_interaction()
-            else:
-                renpy.notify("you won!")
-
-screen giant_minigame:
-    
-    if attack_frame == 1:
-        add "attack1.png" xalign 0.5 yalign 0.5 at Transform(zoom=0.75)
-    elif attack_frame == 2:
-        add "attack2.png" xalign 0.5 yalign 0.5 at Transform(zoom=0.75)
-    elif attack_frame == 3:
-        add "attack3.png" xalign 0.5 yalign 0.5 at Transform(zoom=0.75)
-    imagebutton:
-        idle "giant.png"
-        xalign 1.0 yalign 1.0
-        at Transform(zoom=0.75, alpha=0.0)
-        action AttackTroop()
-    text "Health Left: [troop_hp]" xalign 0.5 yalign 0.25
-
-    textbutton "Exit" xalign 0.5 yalign 0.8
 
 transform left_move:
     zoom 0.75
@@ -81,16 +47,16 @@ label start:
 
     show rk plot at left_move
 
-    play audio "laugh.mp3"
-    show screen delayed_voice("line1.mp3")
+    # play audio "laugh.mp3"
+    # show screen delayed_voice("line1.mp3")
 
     # These display lines of dialogue.
     rk "Fame, wealth, and power shall be mine soon." 
-    show rk plot at Transform(xalign=0.0, yalign=0.9, xzoom=-0.75, yzoom=0.75)
+    show rk plot at Transform(xalign=0.0, yalign=0.9, xzoom=-0.9, yzoom=0.9)
     show bg gloomy
     with Dissolve(1.0)
-    show screen delayed_voice("line2.mp3")
-    play audio "laugh.mp3"
+    # show screen delayed_voice("line2.mp3")
+    # play audio "laugh.mp3"
    
     rk "With my troops, the Blue King won't know what's coming to him!" 
     jump c1
@@ -115,8 +81,10 @@ label c1:
                     jump start
                 else:
                     hide screen two_images with Dissolve(0.5)
+                    show you fear at Transform(xalign=0.5, yalign=1.25, zoom=1.6)
                     you "Rats!"
                     $ c1 == "a"
+                    call clear
                     jump c1a
             
             "Reveal you are a traitor":
@@ -132,28 +100,38 @@ label c1:
                 jump c1b
 
 label c1a:
+    show bg grass2
+    show rk plot at Transform(xalign=0.0, yalign=1.0, xzoom=-0.6, yzoom=0.6)
+    show you sad at Transform(xalign=0.9, yalign=1.25, zoom=1.0)
     rk "Well if it isn't a runt for the Blue King!"
     menu:
         "Lie about your affiliation":
+            show you lie1 at Transform(xalign=0.9, yalign=1.0, zoom=1.45)
             you "What! No?"
+            show you lie2 at Transform(xalign=0.9, yalign=1.0, zoom=1.45)
             you "Don't you know who I am?"
             rk "Hmmm..."
             rk "I don't actually know."
             rk "Are you Tom, Jeff, or Jerry? You barbarians all look the same."
+            show you lie1 at Transform(xalign=0.9, yalign=1.0, zoom=1.45)
             you "I'm Jerry."
             rk "I see."
             $ rand = renpy.random.random()
 
-            if rand < 0.25:
+            if rand < 0.75:
+                show you smile at Transform(xalign=0.9, yalign=1.0, zoom=1.5)
+
                 rk "Ah yes, Jeff!"
                 $ lie_name = True
                 jump c1a1
             else:
                 rk "Do you find me for a fool!"
                 rk "Guards call Tom, Jeff, and Jerry take this imbecile away"
+                call clear
                 jump start
     
         "Stay truthful to your king":
+            show you smile at Transform(xalign=0.9, yalign=1.25, zoom=1.0)
             you "I could never dare to be seen serving a coward!"
             
             $ rand = renpy.random.random()
@@ -168,140 +146,64 @@ label c1a:
                 jump start
 
 label c1a1:
-    rk "However, I have sneaking suspicion of who you say you really are"
+    rk "However, I have sneaking suspicion of who you say you really are..."
     rk "How can I trust you?"
+    show you lie2 at Transform(xalign=0.9, yalign=1.0, zoom=1.45)
     you "Why would I lie!"
     rk "Actually I have an idea. Let's play a game..."
     rk "To see if you really are who you say you are!"
+    show you lie1 at Transform(xalign=0.9, yalign=1.0, zoom=1.45)
     you "Ok!"
-    rk "You must know I hate rubbish, weaklings!"
-    rk "Therefore, you will duel against my strongest troop!"
-    rk "Here's the catch, if you run out of time, or you lose the game is over!"
-    rk "Prove me wrong that you aren't the same old trash as your brothers!"
-    call screen giant_minigame
-    # if user wins
-    rk "I am satisfied with you! Jerry, Jeff or whatever..."
-    you "Thank you!"
-    rk "Well now, child. I have a mission specifically for you!"
-    rk "I want you to go into our enemy's territory"
-    you "But my Lord, isn't that dangerous?"
-    rk "I'm sure you will figure it out!"
-    rk "You and the rest of the barbarians all look the same!"
-    you "Very well..."
-    you "Lord, what would you like me to do there?"
-    rk "Terroize the village!"
-    you "How so?"
-    rk "Child you ask too many questions!"
-    you "I will not do that against sir!"
-    rk "Asking questions make people become idiots like that twat!"
-    rk "There will be archers waiting at the tavern for you and will tell you what to do!"
-    you "(Leave)"
-    rk "This twat really takes me for a fool!"
-    jump c2b
-
-label c1a2:
-    rk "You know, I like people who are overconfident!"
-    rk "Do you know why?"
-    menu:
-        "Why?":
-            rk "Because they are weak and easy to exploit!"
-            jump c1a2a
-        "I could care less":
-            jump c1a2a
-    menu:
-        "It's the hog!":
-            jump c1a2a1
-        "No I don't!":
-            jump c1a2a2
-    rk "My child, there will be two archers waiting for you at the tavern"
-    rk "There they will instruct what you shall do!"
-    you "The tavern..."
-    rk "Yes! Hurry now! Time is running out."
-    #End scene with evil smirk
-    jump c2b
-
-label c1a2a:
-    rk "I'll tell you something."
-    rk "Deep down you know your king is cruel!"
-    you "What terrible lies!"
-    rk "You know it's the truth!"
-    rk "Tell me son, when was the last time that snot put you on his deck?"
-    rk "I don't even need my fingers to count!"
-    you "Why are you telling me this!"
-    rk "I know deep down, you hate him..."
-    you "That's not true!"
-    rk "Oh ho! But it is!"
-    you "What blasphemy!"
-    rk "Calm down child."
-    rk "I can fix you..."
-    rk "You are flustered because someone had stolen your righteous spot from his deck!"
-    rk "Am I wrong?"
-    you "Well...not exactly..."
-    rk "See, the difference between me and that lowlife is I care about my troops"
-    rk "I would never, ever, cast any of them aside."
-    rk "In return they stay loyal to me!"
-    rk "However, that snot clearly does not see the potential you have!"
-    rk "Casting you aside like you are replaceable!"
-    you "Yea! Screw that snot of a loser!"
-    rk "What do you say?"
-    rk "You and I work together."
-    rk "I'll make you our number one..."
-    you "Do you mean it!"
-    rk "Of course."
-    rk "However, I ask that you do as I say in return."
-    you "Of course I will now!"
-    rk "(Discuss Plan)"
-    you "Wait...I have one concern though."
-    rk "Save it for later. We don't have all day here!"
-    rk "Get going or do you want me to repeat myself?!"
-    jump c2b
-
-label c1a2a1:
-    rk "Yes, yes!"
-    you "It's all his fault"
-    you "Tsh"
-    you "Ever since that intolerable man and his pig joined forces my life has been ruined."
-    you "My spotlight is gone now!"
-    rk "That's right, it's all of his fault!"
-    rk "And you didn't come here just to spy!"
-    rk "You seek something else, correct?"
-    you "Yes! If you help me, I'll help you be victorious tommorow!"
-    rk "Very well!"
-    
-label c1a2a2:
-    rk "You are in denial, child."
-    rk "But, do not fret, I can help you."
-    rk "Like the rest of my children, I care about them unlike that old snot face."
-    rk "What do you say, I bring you glory, fame, and power."
-    you "Do you really mean it!"
-    rk "Precisely"
-    rk "However you must help me..."
-    # Fake tears
-    rk "Because...because that brat will win tommorow's fight"
-    rk "My vulnerable children will be hurt..."
-    you "Hey! Don't worry! What do you want me to help you with"
-    # Evil smile
-    rk "Do you know who the 'Hog Rider' is?"
-    you "Yes! He is the one who has stolen by spot!"
-    rk "Well you will happy to know that I want you to sabotage the games tomorrow!"
-    rk "It's a win-win for both of us!"
-    rk "That brat will have no choice but to choose you instead of him!"
-    you "That's what I wanted all along!"
+    rk "You must know I hate rubbish..."
+    rk "Weaklings..."
+    rk "Therefore, you will duel against the giant!"
+    rk "Please do prove me wrong"
+    rk "Click to Attack!"
+    call clear
+    call screen change_scene("Remember Click to Attack!")
+    window hide
+    $ success = renpy.call_screen("giant_minigame")
+    window show
+    if success:
+        show bg grass2
+        show rk plot at Transform(xalign=0.0, yalign=1.0, xzoom=-0.6, yzoom=0.6)
+        show you lie1 at Transform(xalign=0.9, yalign=1.0, zoom=1.45)
+        rk "I am satisfied with you! Jerry, Jeff or whatever..."
+        you "Thank you!"
+        rk "Well now, child. I have a mission specifically for you!"
+        jump c2b
+    else:
+        show bg gloomy
+        show rk plot at Transform(xalign=0.0, yalign=1.0, xzoom=-0.6, yzoom=0.6)
+        show you sad at Transform(xalign=0.9, yalign=1.0, zoom=1.45)
+        rk "Pathetic. You could not finish the trial in time."
+        rk "Return when you have some real strength."
+        call clear
+        jump start
 
 label c1b:
+
     rk "What could you possibly share in common with me?"
     rk "You serve that lowly snot for crying out loud!"
+    show you lie2 at Transform(xalign=0.05, yalign=1.0, zoom=1.45)
     you "You jest! I stopped caring about that rubbish king for a long time now!"
     rk "Oho!"
+    show you neutral at Transform(xalign=0.03, yalign=1.0, zoom=1.45)
     you "I can't stand that mohawk man and his hog."
-    you "Ever since they became a team, my glory as the barbarian has been cast aside!"
+    you "Ever since they became a team..."
+    you "My glory as the barbarian has been cast aside!"
     rk "I see!"
+    show you plot at Transform(xalign=0.05, yalign=1.0, zoom=1.45)
     you "So...Can you help me?"
+    show rk plot at Transform(xalign=0.95, yalign=1.2, xzoom=1.15, yzoom=1.15)
     rk "Of course!"
     rk "However, you must do as I say to ensure success!"
-    rk "(Discusses the plan with you)"
+    show you plot at Transform(xalign=0.05, yalign=1.0, zoom=1.45)
+    show rk plot at Transform(xalign=1.0, yalign=1.0, xzoom=1.0, yzoom=1.0)
     you "Ok! Sounds easy enough!"
+    show you sad at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     you "Wait...I have one concern though."
+    show rk plot at Transform(xalign=0.95, yalign=1.2, xzoom=1.15, yzoom=1.15)
     rk "Save it for later. We don't have all day here!"
     rk "Get going or do you want me to repeat myself?!"
     hide rk plot
@@ -491,33 +393,72 @@ label c3b:
     jump c4
 
 label c4:
+    show bg night
+    show you fear at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
     you "You guys think this is a good idea?"
+    show ar smile at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Relax!"
     ar "It's not like we are going to cook the pig alive!"
+    hide ar smile
+    show go plot at Transform(xalign=0.15, yalign=0.65, xzoom=-0.35, yzoom=0.35)
+    show ar smile at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     go "Gibberish!!!"
+    hide ar smile
+    show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Come on are you really going to chicken out last minute!"
     menu:
         "Of course, I'm not!":
+            call clear
             jump c4a
         "I don't know...":
-            jump c4b # ADD DIALOGUE FOR THIS SH
+            call clear
+            jump c4b
 
 
 label c4a:
+    show bg night
+    show you lie1 at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
+    show go plot at Transform(xalign=0.15, yalign=0.65, xzoom=-0.35, yzoom=0.35)
+    show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+
     you "So, what do we do..."
     ar "Simple, we will sneak into his house..."
     ar "And then slice his pig into pork chop!"
+    show ar smile at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+    show you fear at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
     # show you fear    
     ar "Just kidding."
-    ar "But if we did, would you?"
+    ar "But if we did, you wouldn't mind right?"
     menu:
         "Uhh...I dunno":
+            call clear
             jump c4p
         "I am salivating thinking about it":
+            call clear
             jump c4a2
 
+label c4b:
+    ar "Cmon I know you are that much of a weakling..."
+    ar "Are you really going to betray us..."
+    ar "Even after our king specifically gave you a mission?"
+    ar "We have never had that honour!"
+    you "You're right..."
+    ar "Think about the glory!"
+    ar "Isn't that what you want?"
+    ar "You came to the king seeking the very power the hog rider has stolen from you"
+    you "Yea..."
+    ar "And now you can take it back!"
+    ar "What do you say?"
+    ar "Or are you still the same old coward I thought you were..."
+    you "No I am not!"
+    you "But do you promise the king will make me like him?!"
+    ar "Of course!"
+    ar "We would never lie!"
+    you "Ok fine, I'll do it..."
+    jump c4a2
+
 label c4p:
-    if c1 == "a":
+    if c1 == "b":
         you "But that man and his hog make one heck of a partner"
         you "I don't know about this..."
         you "If we want to stand a chance against the Red King...!"
@@ -530,27 +471,53 @@ label c4p:
             "I am too foolish!":
                 jump c4a1
             "No, I refuse!":
-                jump c4a1 # CHANGE THIS BRUH
-    if c1 == "b":
-        you "Must I really betray my king?"
-        ar "This is not betrayal, this is justice!" (VERBAL IRONY!)
-        ar "Wouldn't you agree? Or are you too much of a coward!"
+                jump c4b
+    if c1 == "a":
+        show bg night
+        show you sad at Transform(xalign=0.85, yalign=1.1, zoom=1.0)
+        show go plot at Transform(xalign=0.15, yalign=0.65, xzoom=-0.35, yzoom=0.35)
+        show ar smile at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+        you "Must I really"
+        show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+        ar "This is not betrayal, this is justice!"
+        ar "Justice against the atrocities committed by the Hog Rider!"
+        show ar talk at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+        ar "Wouldn't you agree?"
+        show you lie2 at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
+
+        you "I guess so..."
+        show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+        ar "Are you too much of coward to leave a blind eye to this?!"
+        show you sad at Transform(xalign=0.85, yalign=1.1, zoom=1.0)
         you "Ok fine!"
+        show you fear at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
         you "I will do it then."
+        call clear
         jump c4a1
 
 label c4a1:
-    ar "You seem a little hesitant!"
+    show bg night
+    show go plot at Transform(xalign=0.15, yalign=0.65, xzoom=-0.35, yzoom=0.35)
+    show ar sad at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+    show you fear at Transform(xalign=0.95, yalign=1.25, zoom=1.6)
+    ar "You still seem a little hesitant!"
     you "No I am not!"
+    show ar talk at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Ok then, grab his pig and do it!"
     you "Do what?"
+    show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "Roast the pig!"
-    ar "The goblins deserve to this feast!"
+    show ar smile at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
+    ar "The goblins deserve a feast!"
+    go "Giiberish!"
     # show you fear
+    show you sad at Transform(xalign=0.85, yalign=1.1, zoom=1.0)
     you "Ok..."
     you "But what if I fail?"
+    show ar plot at Transform(xalign=0.0, yalign=1.0, zoom=0.75)
     ar "You won't."
     ar "Now shoot."
+    call clear
     jump c4a1a
 
 label c4a2:
@@ -564,91 +531,141 @@ label c4a2:
     jump c4a1a
 
 label c4a1a:
+    show bg night2
+    show you plot at Transform(xalign=0.1, yalign=1.1, zoom=1.25)
     you "Ah ha, there you are buddy!"
+    show hog bruh at Transform(xalign=1.0, yalign=1.0, zoom=1.0)
     hog "oink?"
+    you "Your a lot bigger in person, wow!"
     you "Shhh, easy now!"
-    you "Your companion asked me to come get you!"
-    hog "oink oink?"
-    you "Yeah..."
-    you "He's busy with the king."
-    hog "oink! oink!"
-    you "..."
-    you "Sorry things just have to be this way! No hard feelings!"
     menu:
-        "Kidnap the pig":
+        "Continue with kidnapping":
+            call clear
             jump c4a1a1
         "Betray the plan":
-            jump c4a1b
+            hide you plot
+            show screen two_images("you lie1.png", "you lie2.png", 0.05, 1.1, 1.25)  with Dissolve(0.5)
+            you "The king asked me to come get you!"
+            show hog plot at Transform(xalign=1.0, yalign=1.0, zoom=1.0)
+            hog "oink oink?"
+            you "Yeah..."
+            you "It's about your buddy"
+            hog "oink! oink!"
+            you "..."
+            show hog sad at Transform(xalign=1.0, yalign=1.0, zoom=1.0)
+            you "He's been kidnapped!"
+            hog "OINK!"
+            call clear
+            jump c4a1ab
 
 label c4a1a1:
+    show bg night2
+    show you plot at Transform(xalign=0.1, yalign=1.1, zoom=1.25)
+    show hog sad at Transform(xalign=1.0, yalign=1.0, zoom=1.0)
     you "Let's see how heavy you are"
-    pig "OINK OINK!"
+    show hog angry at Transform(xalign=1.0, yalign=1.0, zoom=1.0)
+    hog "OINK OINK!"
     you "Chill!"
-    you "It's not like anything I'll kidnap!"
-    pig "OINK. OINK. OINK."
+    you "Relax, it's not like I'm kidnapping you or anything!"
+    hog "OINK. OINK. OINK."
+    show you fear at Transform(xalign=-0.1, yalign=1.1, zoom=1.25)
     you "You are pissing me off"
+    hog "OINK!"
+    show you smile at Transform(xalign=-0.1, yalign=1.1, zoom=1.25)
     you "Ok fine, let's play a game."
-    pig "oink?"
-    you "Yea! The winner gets corn!"
-    you "Loser has to do what I say."
-    pig "Oink!"
-    you "Looks like you love games"
-    you "Heh. But this game won't be favourable for you buddy"
-    you "The premise is simple if you get to the corn before me, you win"
-    you "But here's the catch!The amount of steps you can take per turn is dependent on what number you and I pick!"
-    pig "oink?"
-    you "We will add both of our numbers that we pick from 1-10"
-    you "If the sum is odd I move the amount of steps I chose and if it's even then your move!"
-    you "The game ends when either of us have made 100 steps"
-    jump corn_minigame
-    # jump c4a1ab
+    show hog bruh at Transform(xalign=1.0, yalign=1.0, zoom=1.0)
+    hog "oink?"
+    show you plot at Transform(xalign=0.1, yalign=1.1, zoom=1.25)
+    you "Yea!"
+    you "If you win, I leave!"
+    you "If you lose, you have to do what I say."
+    show hog plot at Transform(xalign=1.0, yalign=1.0, zoom=1.0)
+    hog "Oink! Oink!"
+    show you smile at Transform(xalign=-0.1, yalign=1.1, zoom=1.25)
+    you "Looks like you love games..."
+    you "Heh. But this game won't be favourable for you buddy..."
+    show you plot at Transform(xalign=0.1, yalign=1.1, zoom=1.25)
+    call clear
+    call screen change_scene("Press Space to Run...")
+    call corn_minigame
+    if winner == "player" or winner == "tie":
+        you "Well, follow me..."
+        show bg night2
+        show you plot at Transform(xalign=0.1, yalign=1.1, zoom=1.25)
+        show hog sad at Transform(xalign=1.0, yalign=1.0, zoom=1.0)
+        window hide
+    else:
+        you "Heh..."
+        you "I never said which corn!"
+        you "I had one in my pocket all along!"
+        you "Now, follow me..."
+        window hide
+    menu:
+        "Put him on a leash":
+            you "Now stay quite..."
+            you "Heh..."
+            call clear
+            ar "Well done!"
+            ar "Bring the hog to the goblins"
+            you "Ok..."
+            ar "Now, your work has been done..."
+            ar "The king sees no further use in you!"
+            you "What?!"
+            ar "What are you going to do?"
+            ar "Fight all of us at once?"
+            ar "Yea shoot!"
+        "Put him in a box":
+            you "Ok, now be quite..."
+            call clear
+            jump c4a1ab
+    # THE PIG IS NOT INSIDE THE CRATE/THE PIG ON A LEASH ISNT THE SAME PIG
 
 label c4a1ab:
+    show bg night2
+    show you sad at Transform(xalign=0.5, yalign=1.0, zoom=1.0)
     you "Nobody is going to know..."
     you "I just need to buy some time..."
-    you "I know!"
-    call change_scene("Moments Later...")
+    call screen change_scene("Moments Later...")
+    show you neutral at Transform(xalign=0.5, yalign=1.0, zoom=1.5)
     you "There!"
     you "Now be a good boy and stay here ok?"
     hog "Oink! Oink!"
-    call change_scene("More Momenets Later...")
-    #(walk back to the rest of the team
+    call clear
+    call screen change_scene("More Momenets Later...")
+    show bg night
+    show you sad at Transform(xalign=0.5, yalign=1.0, zoom=1.0)
     you "Hey where'd everyone go?"
+    scene black with Dissolve(0.8)
+    window hide
+    show text "{size=56}{color=#ffffff}To be continued...{/color}{/size}" at Transform(xalign=0.5, yalign=0.5)
+    pause 3.5
+    hide text
+    return
 
 label corn_minigame:
+    show bg corngame 
+    # show you plot2 at Transform(xalign=0.0, yalign=0.6, zoom=0.2)
+    # show hog smile at Transform(xalign=-0.03, yalign=0.75,zoom=0.5)
     $ player_progress = 0
     $ pig_progress = 0
+    you "Press Space Remember!"
+    call screen change_scene("Ready? 3, 2, 1...")
 
-    show screen race_screen
-
-    while player_progress < 10 and pig_progress < 10:
-        $ renpy.pause(0.1)
-
+    window hide
+    $ winner = renpy.call_screen("race_screen")
+    window show
     hide screen race_screen
-    if player_progress >= 10 and pig_progress >= 10:
+
+    if winner == "player":
         you "It was close, but I got the corn!"
         hog "OINK!!"
-    elif player_progress >= 10:
-        you "Ha! I got the corn first!"
-        hog "OINK!!"
+    elif winner == "pig":
+        hog "OINK OINK!!"
+        you "Argh..."
     else:
-        hog "OINK! OINK!"
-        you "Argh — the pig wins and eats the corn."
-
-    return    
-# lose:
-# 	pig "OINK!"
-# 	you "Ok here is your prize"
-# 	(You capture the pig in the net)
-# 	you "Hey man, no hard feelings"
-# 	jump c4a1a1
-
-# win:
-# 	pig "oink…"
-# 	you "Well, no hard feelings"
-# 	(You capture the pig in the net)
-# 	jump c4a1a1
-
+        you "It's a tie, so I win!"
+        hog "OINK OINK OINK..."
+    return
 
 label clear:
     scene black with Dissolve(0.6)
