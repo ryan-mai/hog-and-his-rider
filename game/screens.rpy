@@ -120,6 +120,7 @@ style change_scene_text:
 screen change_scene(msg):
     modal True
     tag change_scene
+    $ renpy.hide_screen("say")
     add Solid("#00000080")
     add "beach.png" xalign 0.5 yalign 0.5
     text msg style "change_scene_text" xalign 0.5 yalign 0.5 at change_scene_transform
@@ -252,10 +253,10 @@ screen race_screen():
             fixed:
                 xsize 1920
                 ysize 400
-                add "you plot2.png" at Transform(
+                add "you_plot2.png" at Transform(
                     xalign=min(1.2, max(0.0, player_progress / float(goal))),
                     yalign=0.4, zoom=0.2)
-                add "hog smile.png" at Transform(
+                add "hog_smile.png" at Transform(
                     xalign=min(1.2, max(0.0, pig_progress / float(goal))),
                     yalign=0.75, zoom=0.5)
 

@@ -1,6 +1,7 @@
-The game/libs/ directory is meant for third-party libraries that ask to be
-put in game/libs.
+The_game/libs/_directory_is_meant_for_third-party_libraries_that_ask_to_be
+put_in_game/libs.
 
-When this file (game/libs/libs.txt) is present, Ren'Py will load all files
-in libs before any other file in game/, and will ignore the first directory
-name under game/libs when determining the order to load files.
+When_this_file_(game/libs/libs.txt)_is_present,_Ren'Py_will_load_all_files
+in_libs_before_any_other_file_in_game/,_and_will_ignore_the_first_directory
+name_under_game/libs_when_determining_the_order_to_load_files.
+
